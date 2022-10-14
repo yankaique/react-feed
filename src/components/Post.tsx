@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { FormEvent, ChangeEvent, useState, InvalidEvent } from "react";
 import { format, formatDistanceToNow } from "date-fns";
 import ptBR from "date-fns/locale/pt-BR";
 
@@ -6,9 +6,27 @@ import { Avatar } from "./Avatar";
 import { Comment } from "./Comment";
 import styles from "./Post.module.css";
 
-export function Post({ author, publishedAt, content, hashtags }) {
-  const [comments, setComments] = useState([]);
-  const [newCommentText, setNewCommentText] = useState("");
+interface Author {
+  name: string;
+  role: string;
+  avatarUrl: string;
+}
+
+interface Content {
+  type: "paragraph" | "link";
+  content: string;
+}
+
+interface PostProps {
+  author: Author;
+  publishedAt: Date;
+  content: Content[];
+  hashtags: string[];
+}
+
+export function Post({ author, publishedAt, content, hashtags }: PostProps) {
+  const [comments, setComments] = useState<string[]>([]);
+  const [newCommentText, setNewCommentText] = useState<string>("");
 
   const publishedDateFormatted = format(
     publishedAt,
@@ -23,27 +41,27 @@ export function Post({ author, publishedAt, content, hashtags }) {
     addSuffix: true,
   });
 
-  function handleNewCommentChange() {
+  function handleNewCommentChange(event: ChangeEvent<HTMLTextAreaElement>) {
     event.target.setCustomValidity("");
     setNewCommentText(event.target.value);
   }
 
-  function handleCreateNewComment() {
+  function handleCreateNewComment(event: FormEvent) {
     event.preventDefault();
 
     setComments([...comments, newCommentText]);
     setNewCommentText("");
   }
 
-  function deleteComment(commentToDelete) {
-    const commentsWithoutDeletedOne = comment.filter((comment) => {
+  function deleteComment(commentToDelete: string) {
+    const commentsWithoutDeletedOne = comments.filter((comment) => {
       return comment !== commentToDelete;
     });
 
     setComments(commentsWithoutDeletedOne);
   }
 
-  function handleNewCommentInvalid() {
+  function handleNewCommentInvalid(event: InvalidEvent<HTMLTextAreaElement>) {
     event.target.setCustomValidity("Esse campo é obrigatório!");
   }
 
